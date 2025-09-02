@@ -66,6 +66,27 @@
     .card h3{color:var(--green);margin:0 0 .4em}
     .card p{margin:0;color:#333}
     .card.is-current{transform:scale(1);opacity:1;box-shadow:0 10px 36px rgba(0,0,0,.08)}
+    /* Center-mode emphasis: 1 big center card, two neighbors each side */
+.portfolio .card{
+  transition: transform 400ms ease, opacity 300ms ease, box-shadow 300ms ease;
+  transform: scale(.9);
+  opacity: .6;
+}
+.portfolio .card.is-current{
+  transform: scale(1);
+  opacity: 1;
+  z-index: 2;
+}
+.portfolio .card.is-left1,
+.portfolio .card.is-right1{
+  transform: scale(.96);
+  opacity: .85;
+}
+.portfolio .card.is-left2,
+.portfolio .card.is-right2{
+  transform: scale(.94);
+  opacity: .75;
+}
     .carousel button.nav{position:absolute;top:50%;transform:translateY(-50%);background:var(--green);color:var(--cream);border:none;border-radius:999px;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.12)}
     .carousel button.nav:hover{filter:brightness(.9)}
     .carousel button.prev{left:0}
@@ -122,7 +143,7 @@
     footer{background:var(--cream);padding:20px;text-align:center;font-size:14px}
     @media (prefers-reduced-motion: reduce){html{scroll-snap-type:none}.track{transition:none}.parallax-bg{display:none}}
 
-/* === Portfolio carousel: no box, just content === */
+/* === Portfolio carousel: no wrapper box === */
 .portfolio .carousel{
   max-width: var(--container);
   margin: 12px auto 0;
@@ -131,9 +152,8 @@
   border-radius: 0;
   padding: 0;
   box-shadow: none;
-  overflow: visible; /* let card shadows show */
+  overflow: visible; /* let individual card shadows show */
 }
-
 
 /* Cards stay cream and even */
 .portfolio .card{
@@ -170,6 +190,27 @@
 @media (prefers-reduced-motion: reduce){
   .carousel-dots button{ transition:none }
 }
+
+    /* Line pagination under the carousel */
+.carousel-bars{
+  display:flex; gap:10px; justify-content:center; align-items:center;
+  margin-top: 12px;
+}
+.carousel-bars button{
+  width:24px; height:2px;
+  border:none;
+  background: rgba(3,75,63,.30); /* muted green line */
+  opacity:.6;
+  cursor:pointer;
+  padding:0;
+  transition: opacity .2s ease, transform .2s ease, background-color .2s ease;
+}
+.carousel-bars button[aria-current="true"]{
+  background: var(--green);
+  opacity: 1;
+}
+.carousel-bars button:hover{ opacity:.9; transform: scaleY(1.2); }
+.carousel-bars button:focus-visible{ outline:2px solid var(--green); outline-offset:3px; }
 
     
   </style>
@@ -243,7 +284,7 @@
               <p>Mapped ad → PDP → checkout to remove friction and measure impact.</p>
             </a>
           </div>
-          <div class="carousel-dots" role="tablist" aria-label="Slide navigation"></div>
+          <div class="carousel-bars" role="tablist" aria-label="Slide navigation"></div>
 
           <button class="nav next" aria-label="Next">&#10095;</button>
         </div>
@@ -361,7 +402,7 @@
       onScroll();
     })();
 
- // ===== Portfolio carousel (framed, loops back without clones) =====
+// ===== Portfolio carousel (center mode: 1 highlighted, 2 neighbors each side) =====
 (function(){
   const carousel = document.querySelector('.portfolio .carousel');
   if(!carousel) return;
@@ -374,50 +415,45 @@
   let index = 0;
   const AUTOPLAY_MS = 5000;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let autoTimer = null;
+  let timer = null;
 
-  function setCurrent(){
-    cards.forEach(c => { c.classList.remove('is-current'); c.setAttribute('aria-selected','false'); c.tabIndex = -1; });
-    const current = cards[index];
-    current.classList.add('is-current');
-    current.setAttribute('aria-selected','true');
-    current.tabIndex = 0;
+  function setPositions(){
+    const n = cards.length;
+    cards.forEach(c => {
+      c.classList.remove('is-current','is-left1','is-left2','is-right1','is-right2');
+      c.setAttribute('aria-selected','false');
+      c.tabIndex = -1;
+    });
+    const i0 = index;
+    const l1 = (i0 - 1 + n) % n, l2 = (i0 - 2 + n) % n;
+    const r1 = (i0 + 1) % n,     r2 = (i0 + 2) % n;
+
+    cards[i0].classList.add('is-current'); cards[i0].setAttribute('aria-selected','true'); cards[i0].tabIndex = 0;
+    cards[l1].classList.add('is-left1');  cards[l2].classList.add('is-left2');
+    cards[r1].classList.add('is-right1'); cards[r2].classList.add('is-right2');
   }
 
-  function translateToIndex(withAnim = true){
-  track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
-
-  const carouselRect = carousel.getBoundingClientRect();
-  const card = cards[index];
-
-  // Desired offset to center the current card
-  const bias = 12; // px – tiny bias toward the inside
-  const centerTarget = card.offsetLeft + (card.offsetWidth / 2) - (carouselRect.width / 2) - bias;
-
-
-  // Don’t scroll beyond real content
-  const maxScroll = Math.max(0, track.scrollWidth - carouselRect.width);
-  const target = Math.max(0, Math.min(centerTarget, maxScroll));
-
-  track.style.transform = `translateX(${-target}px)`;
-
-  if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
-  setCurrent();
-}
-
-
-  function next(){
-    index = (index + 1) % cards.length; // loop to start
-    translateToIndex(true);
+  // Center the active card; clamp so no empty space shows at ends.
+  function center(withAnim = true){
+    track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
+    const viewport = carousel.getBoundingClientRect().width;
+    const active   = cards[index];
+    const target   = active.offsetLeft + (active.offsetWidth / 2) - (viewport / 2);
+    const max      = Math.max(0, track.scrollWidth - viewport);
+    const clamped  = Math.max(0, Math.min(target, max));
+    track.style.transform = `translateX(${-clamped}px)`;
+    if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
   }
-  function prev(){
-    index = (index - 1 + cards.length) % cards.length; // loop to end
-    translateToIndex(true);
+
+  function update(withAnim = true){
+    setPositions();
+    center(withAnim);
+    updateBars();
   }
-  function go(n){
-    index = ((n % cards.length) + cards.length) % cards.length;
-    translateToIndex(true);
-  }
+
+  function next(){ index = (index + 1) % cards.length; update(true); }
+  function prev(){ index = (index - 1 + cards.length) % cards.length; update(true); }
+  function go(n){ index = ((n % cards.length) + cards.length) % cards.length; update(true); }
 
   // Events
   nextBtn.addEventListener('click', next);
@@ -428,45 +464,38 @@
   });
 
   // Gentle autoplay
-  function startAuto(){ if (reduceMotion) return; stopAuto(); autoTimer = setInterval(next, AUTOPLAY_MS); }
-  function stopAuto(){ if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
-  carousel.addEventListener('mouseenter', stopAuto);
-  carousel.addEventListener('mouseleave', startAuto);
-  carousel.addEventListener('focusin', stopAuto);
-  carousel.addEventListener('focusout', startAuto);
+  function start(){ if (reduceMotion) return; stop(); timer = setInterval(next, AUTOPLAY_MS); }
+  function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+  carousel.addEventListener('mouseenter', stop);
+  carousel.addEventListener('mouseleave', start);
+  carousel.addEventListener('focusin', stop);
+  carousel.addEventListener('focusout', start);
 
-// ---- Dots under the carousel
-const dotsWrap = carousel.querySelector('.carousel-dots');
-if (dotsWrap){
-  const dots = cards.map((_, i) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.setAttribute('aria-label', `Go to slide ${i+1}`);
-    b.setAttribute('aria-current', i === index ? 'true' : 'false');
-    b.addEventListener('click', () => { index = i; translateToIndex(true); updateDots(); });
-    dotsWrap.appendChild(b);
-    return b;
-  });
-
-  function updateDots(){
-    dots.forEach((d, i) => d.setAttribute('aria-current', i === index ? 'true' : 'false'));
+  // Line indicators
+  let bars = [];
+  function buildBars(){
+    const wrap = carousel.querySelector('.carousel-bars');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    bars = cards.map((_, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', `Go to slide ${i+1}`);
+      b.addEventListener('click', () => { index = i; update(true); });
+      wrap.appendChild(b);
+      return b;
+    });
+  }
+  function updateBars(){
+    if (!bars.length) return;
+    bars.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
   }
 
-  // Ensure dots update whenever slides change
-  const oldNext = next, oldPrev = prev, oldGo = go;
-  next = function(){ oldNext(); updateDots(); };
-  prev = function(){ oldPrev(); updateDots(); };
-  go   = function(n){ oldGo(n); updateDots(); };
-
-  window.addEventListener('load', updateDots);
-  window.addEventListener('resize', updateDots);
-}
-
-  
   // Init
-  window.addEventListener('load', () => { translateToIndex(false); startAuto(); });
-  window.addEventListener('resize', () => translateToIndex(false));
+  window.addEventListener('load',  () => { buildBars(); update(false); start(); });
+  window.addEventListener('resize',() => { center(false); });
 })();
+
 
 
   // ===== Minimal dot pager (builds from .panel sections) =====

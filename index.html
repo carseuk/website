@@ -122,30 +122,55 @@
     footer{background:var(--cream);padding:20px;text-align:center;font-size:14px}
     @media (prefers-reduced-motion: reduce){html{scroll-snap-type:none}.track{transition:none}.parallax-bg{display:none}}
 
-
-/* ==== Framed carousel (matches card/slab styling) ==== */
+/* === Carousel framing: border only, no white box === */
 .portfolio .carousel{
   max-width: var(--container);
   margin: 12px auto 0;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.08);
+  background: transparent;             /* was #fff */
+  border: 1px solid rgba(0,0,0,.06);   /* keep subtle frame */
   border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  padding: 16px;                        /* a touch of breathing room */
+  box-shadow: 0 8px 24px rgba(0,0,0,.04);
   overflow: hidden;
 }
 
-/* Cards read evenly; no shrink/ghosting */
+/* Cards stay cream and even */
 .portfolio .card{
-  flex: 0 0 300px;          /* consistent card width */
+  flex: 0 0 300px;      /* tweak to 280–320 if you like */
   transform: none;
   opacity: 1;
 }
 
-/* Tidy nav buttons within the frame edges */
+/* Arrow nudge so they sit inside the frame neatly */
 .portfolio .carousel button.prev{ left: 8px; }
 .portfolio .carousel button.next{ right: 8px; }
 
+/* Dots under the carousel */
+.carousel-dots{
+  display:flex; gap:10px; justify-content:center; align-items:center;
+  margin-top: 12px;
+}
+.carousel-dots button{
+  width:8px; height:8px; border-radius:50%;
+  border:2px solid rgba(3,75,63,.35);
+  background: transparent;
+  cursor:pointer;
+  padding:0;
+  transition: transform .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.carousel-dots button[aria-current="true"]{
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--cream); /* soft halo */
+}
+.carousel-dots button:hover{ transform: scale(1.15); }
+.carousel-dots button:focus-visible{ outline:2px solid var(--green); outline-offset:3px; }
+
+@media (prefers-reduced-motion: reduce){
+  .carousel-dots button{ transition:none }
+}
+
+    
   </style>
 </head>
 <body>
@@ -217,6 +242,8 @@
               <p>Mapped ad → PDP → checkout to remove friction and measure impact.</p>
             </a>
           </div>
+          <div class="carousel-dots" role="tablist" aria-label="Slide navigation"></div>
+
           <button class="nav next" aria-label="Next">&#10095;</button>
         </div>
       </div>
@@ -357,17 +384,26 @@
   }
 
   function translateToIndex(withAnim = true){
-    track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
-    const card = cards[index];
-    const trackRect = track.getBoundingClientRect();
-    const cardRect  = card.getBoundingClientRect();
-    const currentLeft = card.offsetLeft + cardRect.width / 2;
-    const center = trackRect.width / 2;
-    const delta = currentLeft - center;
-    track.style.transform = `translateX(${-delta}px)`;
-    if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
-    setCurrent();
-  }
+  track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
+
+  const carouselRect = carousel.getBoundingClientRect();
+  const card = cards[index];
+
+  // Desired offset to center the current card
+  const bias = 12; // px – tiny bias toward the inside
+  const centerTarget = card.offsetLeft + (card.offsetWidth / 2) - (carouselRect.width / 2) - bias;
+
+
+  // Don’t scroll beyond real content
+  const maxScroll = Math.max(0, track.scrollWidth - carouselRect.width);
+  const target = Math.max(0, Math.min(centerTarget, maxScroll));
+
+  track.style.transform = `translateX(${-target}px)`;
+
+  if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
+  setCurrent();
+}
+
 
   function next(){
     index = (index + 1) % cards.length; // loop to start
@@ -398,6 +434,34 @@
   carousel.addEventListener('focusin', stopAuto);
   carousel.addEventListener('focusout', startAuto);
 
+// ---- Dots under the carousel
+const dotsWrap = carousel.querySelector('.carousel-dots');
+if (dotsWrap){
+  const dots = cards.map((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-label', `Go to slide ${i+1}`);
+    b.setAttribute('aria-current', i === index ? 'true' : 'false');
+    b.addEventListener('click', () => { index = i; translateToIndex(true); updateDots(); });
+    dotsWrap.appendChild(b);
+    return b;
+  });
+
+  function updateDots(){
+    dots.forEach((d, i) => d.setAttribute('aria-current', i === index ? 'true' : 'false'));
+  }
+
+  // Ensure dots update whenever slides change
+  const oldNext = next, oldPrev = prev, oldGo = go;
+  next = function(){ oldNext(); updateDots(); };
+  prev = function(){ oldPrev(); updateDots(); };
+  go   = function(n){ oldGo(n); updateDots(); };
+
+  window.addEventListener('load', updateDots);
+  window.addEventListener('resize', updateDots);
+}
+
+  
   // Init
   window.addEventListener('load', () => { translateToIndex(false); startAuto(); });
   window.addEventListener('resize', () => translateToIndex(false));

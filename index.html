@@ -34,6 +34,14 @@
       --sage-04: rgba(174,194,179,.04);
       --sage-05: rgba(174,194,179,.05);
       --sage-07: rgba(174,194,179,.07);
+      :root{
+  /* add stronger options */
+  --sand-10: rgba(232,219,201,.10);
+  --sand-12: rgba(232,219,201,.12);
+  --sage-08: rgba(174,194,179,.08);
+  --sage-10: rgba(174,194,179,.10);
+}
+
 
       /* Carousel sizing */
       --card-w: 320px;
@@ -61,12 +69,13 @@
     section.panel .inner{position:relative; z-index:2; width:100%}
     section.panel .inner.narrow{max-width:900px; margin:0 auto; text-align:center; padding:80px 20px}
 
-    /* Tinted backgrounds per section (layered over cream) */
-    .hero{background:var(--cream)}
-    .portfolio{background:linear-gradient(var(--sand-06),var(--sand-06)),var(--cream)}
-    .services{background:linear-gradient(var(--sage-05),var(--sage-05)),var(--cream)}
-    .about{background:linear-gradient(var(--sand-03),var(--sand-03)),var(--cream)}
-    .contact{background:linear-gradient(var(--sand-08),var(--sand-08)),var(--cream)}
+    /* Stronger but still minimal */
+.hero{background:var(--cream)}
+.portfolio{background:linear-gradient(var(--sand-10),var(--sand-10)),var(--cream)}
+.services{background:linear-gradient(var(--sage-10),var(--sage-10)),var(--cream)}
+.about{background:linear-gradient(var(--sand-06),var(--sand-06)),var(--cream)}
+.contact{background:linear-gradient(var(--sand-12),var(--sand-12)),var(--cream)}
+
 
     /* Soft separators: hairline + feather at top of each non-hero section */
     .panel:not(.hero)::before{

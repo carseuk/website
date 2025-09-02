@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
   <link rel="manifest" href="assets/site.webmanifest">
   <link rel="shortcut icon" href="assets/favicon.ico">
-  
+
   <style>
     /* ===== Brand tokens ===== */
     :root{
@@ -23,136 +23,103 @@
       --sage:#AEC2B3;
       --deep:#1E2A22;
       --text:#202320;
-      --accent:#EBFF5C; /* CTA accent if you add buttons later */
+      --accent:#EBFF5C;
+      --green:#034b3f; /* brand green */
+      --card:#ffffff;
+      --shadow: 0 18px 40px rgba(0,0,0,.06);
     }
 
     /* ===== Base ===== */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      background:var(--cream);
-      color:var(--text);
+      margin:0; background:var(--cream); color:var(--text);
       font:16px/1.6 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
     h1,h2,h3,h4{
       font-family:"Cormorant Garamond", Georgia, "Times New Roman", serif;
-      color:var(--deep);
-      margin:0 0 .5em;
-      letter-spacing:.2px;
+      color:var(--deep); margin:0 0 .5em; letter-spacing:.2px;
     }
     a{color:inherit}
-
     .container{max-width:1100px; margin:0 auto; padding:0 clamp(20px,4vw,40px)}
 
     /* ===== Header ===== */
     header.site-header{
-      position:sticky; top:0; z-index:10;
-      background:var(--cream);
+      position:sticky; top:0; z-index:10; background:var(--cream);
       border-bottom:1px solid rgba(0,0,0,.06);
     }
-    .header-inner{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:18px 0;
-    }
-    .brand {
-      font-family:"Cormorant Garamond", Georgia, serif;
-      font-weight:700;
-      font-size:36px;   /* presence */
-      color:#034b3f;    /* brand green */
-      text-decoration:none;
-      letter-spacing:.3px;
-    }
-    nav.primary a{
-      text-decoration:none; color:var(--deep); opacity:.9;
-      margin-left:22px; padding-bottom:2px; border-bottom:2px solid transparent;
-      font-weight:500;
-    }
+    .header-inner{display:flex; align-items:center; justify-content:space-between; padding:18px 0;}
+    .brand{font-family:"Cormorant Garamond", Georgia, serif; font-weight:700; font-size:36px; color:var(--green); text-decoration:none; letter-spacing:.3px;}
+    nav.primary a{ text-decoration:none; color:var(--deep); opacity:.9; margin-left:22px; padding-bottom:2px; border-bottom:2px solid transparent; font-weight:500;}
     nav.primary a:hover{opacity:1; border-color:rgba(30,42,34,.18)}
 
-    /* ===== Hero ===== */
-    .hero{
-      padding: clamp(56px, 12vh, 120px) 0 clamp(32px, 8vh, 64px);
+    /* ===== Hero (split) ===== */
+    .hero{ padding: clamp(56px, 12vh, 120px) 0 clamp(24px, 6vh, 48px); }
+    .hero-grid{ display:grid; grid-template-columns: 1.1fr 1fr; gap: clamp(24px, 4vw, 48px); align-items:center; }
+    .hero-copy h1{ font-size: clamp(40px, 7.2vw, 84px); line-height:1.05; margin:0 0 12px; }
+    .hero .intro{ max-width: 58ch; font-size: clamp(18px, 2.1vw, 22px); opacity:.92; }
+    .btn{ display:inline-block; margin-top:18px; padding:12px 16px; border-radius:999px; background:var(--green); color:#fff; text-decoration:none; }
+    .hero-media{
+      aspect-ratio: 4 / 3; border-radius: 16px; background:
+        linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0)),
+        repeating-linear-gradient(90deg, rgba(30,42,34,.06) 0 1px, transparent 1px 14px),
+        var(--sand);
+      box-shadow: var(--shadow); border:1px solid rgba(0,0,0,.06);
     }
-    .hero .intro{
-      max-width: 70ch;
-      font-size: clamp(18px, 2.1vw, 22px);
-      color: var(--text);
-      opacity:.92;
-    }
-    .hero h1{
-      font-size: clamp(40px, 7.2vw, 84px);
-      line-height:1.05;
-      margin-bottom:12px;
+    .hero-media img{ width:100%; height:100%; object-fit:cover; border-radius:16px; display:block; }
+    @media (max-width: 840px){ .hero-grid{ grid-template-columns:1fr; } .hero-media{ order:-1; } }
+
+    /* ===== Cascading slab sections ===== */
+    .cascade{ background:transparent; padding: 0 0 clamp(56px, 10vh, 96px); }
+    .slab{
+      background: var(--card); border:1px solid rgba(0,0,0,.06); border-radius:20px;
+      box-shadow: var(--shadow); padding: clamp(28px, 4vw, 44px);
+      transform: translateY(-36px);
     }
 
-    /* ===== Carousel Section ===== */
-    .portfolio{
-      padding: clamp(36px, 8vh, 72px) 0 clamp(56px, 10vh, 96px);
-      border-top:1px solid rgba(0,0,0,.05);
-    }
-    .portfolio h2{
-      font-size: clamp(28px, 4.5vw, 40px);
-      margin-bottom: 18px;
-    }
-    .carousel{
-      position:relative;
-      overflow:hidden;
-      padding: 24px 0 12px;
-    }
-    .track{
-      display:flex; align-items:stretch; justify-content:center;
-      gap: clamp(12px, 2vw, 20px);
-      transition: transform 600ms ease;
-      will-change: transform;
-    }
-    @media (prefers-reduced-motion: reduce){
-      .track{ transition:none }
-    }
+    /* ===== Carousel ===== */
+    .portfolio h2{ font-size: clamp(28px, 4.5vw, 40px); margin-bottom: 18px; }
+    .carousel{ position:relative; overflow:hidden; padding: 24px 0 12px; }
+    .track{ display:flex; align-items:stretch; justify-content:center; gap: clamp(12px, 2vw, 20px); transition: transform 600ms ease; will-change: transform; }
+    @media (prefers-reduced-motion: reduce){ .track{ transition:none } }
 
     .card{
+      display:block; /* so the whole card anchor is clickable */
       flex: 0 0 clamp(240px, 36vw, 360px);
-      background: white;
-      border:1px solid rgba(0,0,0,.06);
-      border-radius:16px;
+      background:#fff; border:1px solid rgba(0,0,0,.06); border-radius:16px;
       box-shadow: 0 6px 24px rgba(0,0,0,.04);
-      padding: 18px;
-      transform: scale(.92);
-      opacity:.6;
+      padding: 18px; transform: scale(.92); opacity:.6;
       transition: transform 400ms ease, opacity 400ms ease, box-shadow 400ms ease;
+      text-decoration:none;
     }
-    .card h3{
-      font-size: clamp(20px, 3.2vw, 24px);
-      margin-bottom:.4em;
-    }
+    .card h3{ font-size: clamp(20px, 3.2vw, 24px); margin:0 0 .4em; color:var(--deep); }
     .card p{ margin:0; color:#4a4f4a }
+    .card.is-current{ transform: scale(1); opacity:1; box-shadow: 0 10px 36px rgba(0,0,0,.08); }
 
-    .card.is-current{
-      transform: scale(1);
-      opacity:1;
-      box-shadow: 0 10px 36px rgba(0,0,0,.08);
-    }
-
-    /* Nav buttons */
     .carousel button.nav{
       position:absolute; top:50%; transform: translateY(-50%);
-      background: rgba(255,255,255,.8);
-      border:1px solid rgba(0,0,0,.1);
+      background: rgba(255,255,255,.8); border:1px solid rgba(0,0,0,.1);
       border-radius: 999px; width:40px; height:40px; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      box-shadow:0 4px 16px rgba(0,0,0,.08);
+      display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(0,0,0,.08);
     }
     .carousel button.nav:hover{ background:white }
-    .carousel button.prev{ left:0 }
-    .carousel button.next{ right:0 }
+    .carousel button.prev{ left:0 } .carousel button.next{ right:0 }
+
+    /* ===== Steps (Section 3) ===== */
+    .steps{
+      display:grid; grid-template-columns: repeat(3, 1fr);
+      gap: clamp(16px, 3vw, 28px); margin-top: 12px;
+    }
+    .steps article{
+      background: var(--cream); border:1px solid rgba(0,0,0,.05); border-radius:16px;
+      padding: clamp(16px, 2.2vw, 22px); box-shadow: 0 8px 24px rgba(0,0,0,.04);
+    }
+    .steps h3{ margin:0 0 .35em; font-size: clamp(18px, 2.4vw, 22px); color:var(--deep); }
+    @media (max-width: 840px){ .steps{ grid-template-columns: 1fr; } }
 
     /* ===== Footer ===== */
-    footer.site-footer{
-      border-top:1px solid rgba(0,0,0,.06);
-      padding:28px 0 36px;
-      color:#4a4f4a; font-size:14px;
-    }
+    footer.site-footer{ border-top:1px solid rgba(0,0,0,.06); padding:28px 0 36px; color:#4a4f4a; font-size:14px; }
   </style>
 </head>
 <body>
@@ -169,47 +136,79 @@
     </div>
   </header>
 
-  <!-- ===== Hero ===== -->
   <main>
+    <!-- ===== Hero (split) ===== -->
     <section class="hero container" id="hero">
-      <h1>Discover the story behind your sales…</h1>
-      <p class="intro">Carse Analytics helps SMEs make sense of messy Shopify data. We turn transactions into insights you can use to grow with confidence.</p>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1>Discover the story behind your sales…</h1>
+          <p class="intro">Carse Analytics helps SMEs make sense of messy Shopify data. We turn transactions into insights you can use to grow with confidence.</p>
+          <!-- <a class="btn" href="#contact">Get a 20-min data audit</a> -->
+        </div>
+        <div class="hero-media" aria-label="Photo placeholder">
+          <!-- Later: <img src="assets/hero.jpg" alt="Small business preparing orders"> -->
+        </div>
+      </div>
     </section>
 
-    <!-- ===== Portfolio Carousel (5 items, seamless loop) ===== -->
-    <section class="portfolio" aria-labelledby="portfolio-title">
-      <div class="container">
+    <!-- ===== Selected work (cascading slab) ===== -->
+    <section class="portfolio cascade" aria-labelledby="portfolio-title">
+      <div class="container slab">
         <h2 id="portfolio-title">Selected work</h2>
+
         <div class="carousel" role="region" aria-roledescription="carousel" aria-label="Portfolio carousel">
           <button class="nav prev" aria-label="Previous">&#10094;</button>
+
           <div class="track" role="listbox" aria-live="polite">
-            <!-- Card 1 -->
-            <article class="card is-current" role="option" aria-selected="true" tabindex="0">
+            <!-- Use anchors so the whole card is clickable -->
+            <a class="card is-current" href="#case1" role="option" aria-selected="true" tabindex="0">
               <h3>Portfolio item #1</h3>
               <p>Short description. Replace with your case study later.</p>
-            </article>
-            <!-- Card 2 -->
-            <article class="card" role="option" aria-selected="false" tabindex="-1">
+            </a>
+
+            <a class="card" href="#case2" role="option" aria-selected="false" tabindex="-1">
               <h3>Portfolio item #2</h3>
               <p>Short description. Replace with your case study later.</p>
-            </article>
-            <!-- Card 3 -->
-            <article class="card" role="option" aria-selected="false" tabindex="-1">
+            </a>
+
+            <a class="card" href="#case3" role="option" aria-selected="false" tabindex="-1">
               <h3>Portfolio item #3</h3>
               <p>Short description. Replace with your case study later.</p>
-            </article>
-            <!-- Card 4 -->
-            <article class="card" role="option" aria-selected="false" tabindex="-1">
+            </a>
+
+            <a class="card" href="#case4" role="option" aria-selected="false" tabindex="-1">
               <h3>Portfolio item #4</h3>
               <p>Short description. Replace with your case study later.</p>
-            </article>
-            <!-- Card 5 -->
-            <article class="card" role="option" aria-selected="false" tabindex="-1">
+            </a>
+
+            <a class="card" href="#case5" role="option" aria-selected="false" tabindex="-1">
               <h3>Portfolio item #5</h3>
               <p>Short description. Replace with your case study later.</p>
-            </article>
+            </a>
           </div>
+
           <button class="nav next" aria-label="Next">&#10095;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: How we work (cascading slab) ===== -->
+    <section class="cascade" aria-labelledby="how-title">
+      <div class="container slab">
+        <h2 id="how-title">How we work</h2>
+        <div class="steps">
+          <article>
+            <h3>1) Quick audit</h3>
+            <p>Connect Shopify. We check fees, returns, and true margin.</p>
+          </article>
+          <article>
+            <h3>2) Clear insights</h3>
+            <p>Three actionable findings—visual, plain English, no jargon.</p>
+          </article>
+          <article>
+            <h3>3) Ongoing reporting</h3>
+            <p>Monthly dashboards your team actually uses. No vanity charts.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -223,7 +222,7 @@
   </footer>
 
   <script>
-    // ===== Year in footer =====
+    // Year in footer
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // ===== Seamless carousel (clones for infinite loop) =====
@@ -236,106 +235,72 @@
       const nextBtn = carousel.querySelector('.next');
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // 1) Clone ends
+      // Clone first & last
       const originals = Array.from(track.children);
-      if (originals.length < 2) return; // need at least 2
+      if (originals.length < 2) return;
 
       const firstClone = originals[0].cloneNode(true);
       const lastClone  = originals[originals.length - 1].cloneNode(true);
       track.insertBefore(lastClone, originals[0]);
       track.appendChild(firstClone);
 
-      // Recompute cards list (now includes clones)
       let cards = Array.from(track.children);
+      let index = 1; // start on first real card
 
-      // 2) Start at first REAL slide (index 1 because 0 is the left clone)
-      let index = 1;
-
-      // Autoplay
       let autoTimer = null;
       const AUTOPLAY_MS = 5000;
 
       function setCurrentClasses(){
-        // Clear
         cards.forEach(c => { c.classList.remove('is-current'); c.setAttribute('aria-selected','false'); c.tabIndex = -1; });
-
-        // Map clones to real indexes for highlighting
         let realIndex = index;
-        if (index === 0) realIndex = cards.length - 2;            // left clone -> last real
-        if (index === cards.length - 1) realIndex = 1;            // right clone -> first real
-
-        const currentCard = cards[realIndex];
-        currentCard.classList.add('is-current');
-        currentCard.setAttribute('aria-selected','true');
-        currentCard.tabIndex = 0;
+        if (index === 0) realIndex = cards.length - 2;
+        if (index === cards.length - 1) realIndex = 1;
+        const current = cards[realIndex];
+        current.classList.add('is-current');
+        current.setAttribute('aria-selected','true');
+        current.tabIndex = 0;
       }
 
       function translateToIndex(withAnim = true){
         track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
-
         const card = cards[index];
         const trackRect = track.getBoundingClientRect();
         const cardRect = card.getBoundingClientRect();
-
-        // Center the active card
         const currentLeft = card.offsetLeft + cardRect.width / 2;
         const center = trackRect.width / 2;
         const delta = currentLeft - center;
         track.style.transform = `translateX(${-delta}px)`;
-
         if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
         setCurrentClasses();
       }
 
-      function go(n){
-        index = n;
-        translateToIndex(true);
-      }
+      function go(n){ index = n; translateToIndex(true); }
       function next(){ go(index + 1); }
       function prev(){ go(index - 1); }
 
-      // Jump seamlessly when hitting a clone
       track.addEventListener('transitionend', () => {
-        if (index === cards.length - 1) {  // right clone
-          index = 1;                       // first real
-          translateToIndex(false);
-        } else if (index === 0) {          // left clone
-          index = cards.length - 2;        // last real
-          translateToIndex(false);
-        }
+        if (index === cards.length - 1) { index = 1; translateToIndex(false); }
+        else if (index === 0) { index = cards.length - 2; translateToIndex(false); }
       });
 
-      // Buttons + keyboard
       prevBtn.addEventListener('click', prev);
       nextBtn.addEventListener('click', next);
+
       carousel.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') prev();
         if (e.key === 'ArrowRight') next();
       });
 
-      // Autoplay with hover/focus pause
-      function startAuto(){
-        if (reduceMotion) return;
-        stopAuto();
-        autoTimer = setInterval(next, AUTOPLAY_MS);
-      }
-      function stopAuto(){
-        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-      }
+      function startAuto(){ if (reduceMotion) return; stopAuto(); autoTimer = setInterval(next, AUTOPLAY_MS); }
+      function stopAuto(){ if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
       carousel.addEventListener('mouseenter', stopAuto);
       carousel.addEventListener('mouseleave', startAuto);
       carousel.addEventListener('focusin', stopAuto);
       carousel.addEventListener('focusout', startAuto);
 
-      // Initial layout
-      window.addEventListener('load', () => {
-        translateToIndex(false); // position instantly on first real slide
-        startAuto();
-      });
+      window.addEventListener('load', () => { translateToIndex(false); startAuto(); });
       window.addEventListener('resize', () => translateToIndex(false));
     })();
   </script>
 </body>
 </html>
-
-

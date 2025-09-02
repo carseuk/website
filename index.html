@@ -61,7 +61,7 @@
 
     /* Carousel (green/cream palette) */
     .carousel{position:relative;overflow:hidden;padding:24px 0 12px}
-    .track{display:flex;align-items:stretch;justify-content:center;gap:clamp(12px,2vw,20px);transition:transform 600ms ease;will-change:transform}
+    .track{display:flex;align-items:stretch;justify-content:flex-start;gap:clamp(12px,2vw,20px);transition:transform 600ms ease;will-change:transform}
     .card{display:block;flex:0 0 clamp(240px,36vw,360px);background:var(--cream);border:1px solid rgba(0,0,0,.06);border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.04);padding:18px;text-decoration:none;color:var(--text);transform:scale(.92);opacity:.65;transition:transform 400ms ease,opacity 400ms ease,box-shadow 400ms ease}
     .card h3{color:var(--green);margin:0 0 .4em}
     .card p{margin:0;color:#333}
@@ -122,17 +122,18 @@
     footer{background:var(--cream);padding:20px;text-align:center;font-size:14px}
     @media (prefers-reduced-motion: reduce){html{scroll-snap-type:none}.track{transition:none}.parallax-bg{display:none}}
 
-/* === Carousel framing: border only, no white box === */
+/* === Portfolio carousel: no box, just content === */
 .portfolio .carousel{
   max-width: var(--container);
   margin: 12px auto 0;
-  background: transparent;             /* was #fff */
-  border: 1px solid rgba(0,0,0,.06);   /* keep subtle frame */
-  border-radius: 16px;
-  padding: 16px;                        /* a touch of breathing room */
-  box-shadow: 0 8px 24px rgba(0,0,0,.04);
-  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  overflow: visible; /* let card shadows show */
 }
+
 
 /* Cards stay cream and even */
 .portfolio .card{
@@ -142,8 +143,8 @@
 }
 
 /* Arrow nudge so they sit inside the frame neatly */
-.portfolio .carousel button.prev{ left: 8px; }
-.portfolio .carousel button.next{ right: 8px; }
+.portfolio .carousel button.prev{ left: -6px; }
+.portfolio .carousel button.next{ right: -6px; }
 
 /* Dots under the carousel */
 .carousel-dots{

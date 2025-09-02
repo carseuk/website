@@ -121,6 +121,31 @@
 
     footer{background:var(--cream);padding:20px;text-align:center;font-size:14px}
     @media (prefers-reduced-motion: reduce){html{scroll-snap-type:none}.track{transition:none}.parallax-bg{display:none}}
+
+
+/* ==== Framed carousel (matches card/slab styling) ==== */
+.portfolio .carousel{
+  max-width: var(--container);
+  margin: 12px auto 0;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+
+/* Cards read evenly; no shrink/ghosting */
+.portfolio .card{
+  flex: 0 0 300px;          /* consistent card width */
+  transform: none;
+  opacity: 1;
+}
+
+/* Tidy nav buttons within the frame edges */
+.portfolio .carousel button.prev{ left: 8px; }
+.portfolio .carousel button.next{ right: 8px; }
+
   </style>
 </head>
 <body>
@@ -308,79 +333,76 @@
       onScroll();
     })();
 
-    // Portfolio carousel
-    (function(){
-      const carousel = document.querySelector('.carousel');
-      if(!carousel) return;
-      const track = carousel.querySelector('.track');
-      const prevBtn = carousel.querySelector('.prev');
-      const nextBtn = carousel.querySelector('.next');
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ // ===== Portfolio carousel (framed, loops back without clones) =====
+(function(){
+  const carousel = document.querySelector('.portfolio .carousel');
+  if(!carousel) return;
+  const track   = carousel.querySelector('.track');
+  const prevBtn = carousel.querySelector('.prev');
+  const nextBtn = carousel.querySelector('.next');
+  const cards   = Array.from(track.children);
+  if (cards.length < 2) return;
 
-      const originals = Array.from(track.children);
-      if (originals.length < 2) return;
-      const firstClone = originals[0].cloneNode(true);
-      const lastClone  = originals[originals.length - 1].cloneNode(true);
-      track.insertBefore(lastClone, originals[0]);
-      track.appendChild(firstClone);
+  let index = 0;
+  const AUTOPLAY_MS = 5000;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let autoTimer = null;
 
-      let cards = Array.from(track.children);
-      let index = 1; // start on first real card
+  function setCurrent(){
+    cards.forEach(c => { c.classList.remove('is-current'); c.setAttribute('aria-selected','false'); c.tabIndex = -1; });
+    const current = cards[index];
+    current.classList.add('is-current');
+    current.setAttribute('aria-selected','true');
+    current.tabIndex = 0;
+  }
 
-      let autoTimer = null;
-      const AUTOPLAY_MS = 5000;
+  function translateToIndex(withAnim = true){
+    track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
+    const card = cards[index];
+    const trackRect = track.getBoundingClientRect();
+    const cardRect  = card.getBoundingClientRect();
+    const currentLeft = card.offsetLeft + cardRect.width / 2;
+    const center = trackRect.width / 2;
+    const delta = currentLeft - center;
+    track.style.transform = `translateX(${-delta}px)`;
+    if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
+    setCurrent();
+  }
 
-      function setCurrentClasses(){
-        cards.forEach(c => { c.classList.remove('is-current'); c.setAttribute('aria-selected','false'); c.tabIndex = -1; });
-        let realIndex = index;
-        if (index === 0) realIndex = cards.length - 2;
-        if (index === cards.length - 1) realIndex = 1;
-        const current = cards[realIndex];
-        current.classList.add('is-current');
-        current.setAttribute('aria-selected','true');
-        current.tabIndex = 0;
-      }
+  function next(){
+    index = (index + 1) % cards.length; // loop to start
+    translateToIndex(true);
+  }
+  function prev(){
+    index = (index - 1 + cards.length) % cards.length; // loop to end
+    translateToIndex(true);
+  }
+  function go(n){
+    index = ((n % cards.length) + cards.length) % cards.length;
+    translateToIndex(true);
+  }
 
-      function translateToIndex(withAnim = true){
-        track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
-        const card = cards[index];
-        const trackRect = track.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        const currentLeft = card.offsetLeft + cardRect.width / 2;
-        const center = trackRect.width / 2;
-        const delta = currentLeft - center;
-        track.style.transform = `translateX(${-delta}px)`;
-        if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
-        setCurrentClasses();
-      }
+  // Events
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+  carousel.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prev();
+    if (e.key === 'ArrowRight') next();
+  });
 
-      function go(n){ index = n; translateToIndex(true); }
-      function next(){ go(index + 1); }
-      function prev(){ go(index - 1); }
+  // Gentle autoplay
+  function startAuto(){ if (reduceMotion) return; stopAuto(); autoTimer = setInterval(next, AUTOPLAY_MS); }
+  function stopAuto(){ if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
+  carousel.addEventListener('mouseenter', stopAuto);
+  carousel.addEventListener('mouseleave', startAuto);
+  carousel.addEventListener('focusin', stopAuto);
+  carousel.addEventListener('focusout', startAuto);
 
-      track.addEventListener('transitionend', () => {
-        if (index === cards.length - 1) { index = 1; translateToIndex(false); }
-        else if (index === 0) { index = cards.length - 2; translateToIndex(false); }
-      });
+  // Init
+  window.addEventListener('load', () => { translateToIndex(false); startAuto(); });
+  window.addEventListener('resize', () => translateToIndex(false));
+})();
 
-      prevBtn.addEventListener('click', prev);
-      nextBtn.addEventListener('click', next);
-
-      carousel.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') prev();
-        if (e.key === 'ArrowRight') next();
-      });
-
-      function startAuto(){ if (reduceMotion) return; stopAuto(); autoTimer = setInterval(next, AUTOPLAY_MS); }
-      function stopAuto(){ if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
-      carousel.addEventListener('mouseenter', stopAuto);
-      carousel.addEventListener('mouseleave', startAuto);
-      carousel.addEventListener('focusin', stopAuto);
-      carousel.addEventListener('focusout', startAuto);
-
-      window.addEventListener('load', () => { translateToIndex(false); startAuto(); });
-      window.addEventListener('resize', () => translateToIndex(false));
-    })();
 
   // ===== Minimal dot pager (builds from .panel sections) =====
 (function(){

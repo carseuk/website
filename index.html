@@ -59,7 +59,7 @@
     .brand {
       font-family:"Cormorant Garamond", Georgia, serif;
       font-weight:700;
-      font-size:36px;   /* bumped size for more presence */
+      font-size:36px;   /* presence */
       color:#034b3f;    /* brand green */
       text-decoration:none;
       letter-spacing:.3px;
@@ -71,17 +71,7 @@
     }
     nav.primary a:hover{opacity:1; border-color:rgba(30,42,34,.18)}
 
-    nav.primary a {
-      color:#034b3f; 
-      opacity:.85;
-    }  
-    nav.primary a:hover {
-      opacity:1;
-      border-color:#034b3f;
-    }
-
-
-    /* ===== Hero placeholder ===== */
+    /* ===== Hero ===== */
     .hero{
       padding: clamp(56px, 12vh, 120px) 0 clamp(32px, 8vh, 64px);
     }
@@ -144,7 +134,7 @@
       box-shadow: 0 10px 36px rgba(0,0,0,.08);
     }
 
-    /* Nav buttons (optional; also keyboard accessible) */
+    /* Nav buttons */
     .carousel button.nav{
       position:absolute; top:50%; transform: translateY(-50%);
       background: rgba(255,255,255,.8);
@@ -179,14 +169,14 @@
     </div>
   </header>
 
-  <!-- ===== Hero (you fill in the copy) ===== -->
+  <!-- ===== Hero ===== -->
   <main>
     <section class="hero container" id="hero">
-      <h1><!-- Your hero headline here --></h1>
-      <p class="intro"><!-- Your subheadline / intro text here --></p>
+      <h1>Discover the story behind your sales…</h1>
+      <p class="intro">Carse Analytics helps SMEs make sense of messy Shopify data. We turn transactions into insights you can use to grow with confidence.</p>
     </section>
 
-    <!-- ===== Portfolio Carousel ===== -->
+    <!-- ===== Portfolio Carousel (5 items, seamless loop) ===== -->
     <section class="portfolio" aria-labelledby="portfolio-title">
       <div class="container">
         <h2 id="portfolio-title">Selected work</h2>
@@ -208,6 +198,16 @@
               <h3>Portfolio item #3</h3>
               <p>Short description. Replace with your case study later.</p>
             </article>
+            <!-- Card 4 -->
+            <article class="card" role="option" aria-selected="false" tabindex="-1">
+              <h3>Portfolio item #4</h3>
+              <p>Short description. Replace with your case study later.</p>
+            </article>
+            <!-- Card 5 -->
+            <article class="card" role="option" aria-selected="false" tabindex="-1">
+              <h3>Portfolio item #5</h3>
+              <p>Short description. Replace with your case study later.</p>
+            </article>
           </div>
           <button class="nav next" aria-label="Next">&#10095;</button>
         </div>
@@ -226,75 +226,116 @@
     // ===== Year in footer =====
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ===== Simple carousel logic (no deps) =====
+    // ===== Seamless carousel (clones for infinite loop) =====
     (function(){
       const carousel = document.querySelector('.carousel');
+      if(!carousel) return;
+
       const track = carousel.querySelector('.track');
-      const cards = Array.from(track.children);
       const prevBtn = carousel.querySelector('.prev');
       const nextBtn = carousel.querySelector('.next');
-
-      let index = 0;
-      let autoTimer = null;
-      const AUTOPLAY_MS = 4000;
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      function update(){
-        cards.forEach((c,i)=>{
-          c.classList.toggle('is-current', i===index);
-          c.setAttribute('aria-selected', i===index ? 'true':'false');
-          c.tabIndex = i===index ? 0 : -1;
-        });
+      // 1) Clone ends
+      const originals = Array.from(track.children);
+      if (originals.length < 2) return; // need at least 2
 
-        // Center the current card
+      const firstClone = originals[0].cloneNode(true);
+      const lastClone  = originals[originals.length - 1].cloneNode(true);
+      track.insertBefore(lastClone, originals[0]);
+      track.appendChild(firstClone);
+
+      // Recompute cards list (now includes clones)
+      let cards = Array.from(track.children);
+
+      // 2) Start at first REAL slide (index 1 because 0 is the left clone)
+      let index = 1;
+
+      // Autoplay
+      let autoTimer = null;
+      const AUTOPLAY_MS = 5000;
+
+      function setCurrentClasses(){
+        // Clear
+        cards.forEach(c => { c.classList.remove('is-current'); c.setAttribute('aria-selected','false'); c.tabIndex = -1; });
+
+        // Map clones to real indexes for highlighting
+        let realIndex = index;
+        if (index === 0) realIndex = cards.length - 2;            // left clone -> last real
+        if (index === cards.length - 1) realIndex = 1;            // right clone -> first real
+
+        const currentCard = cards[realIndex];
+        currentCard.classList.add('is-current');
+        currentCard.setAttribute('aria-selected','true');
+        currentCard.tabIndex = 0;
+      }
+
+      function translateToIndex(withAnim = true){
+        track.style.transition = withAnim ? 'transform 600ms ease' : 'none';
+
         const card = cards[index];
-        const cardRect = card.getBoundingClientRect();
         const trackRect = track.getBoundingClientRect();
-        const currentLeft = card.offsetLeft + cardRect.width/2;
-        const center = (track.scrollLeft || 0) + trackRect.width/2;
+        const cardRect = card.getBoundingClientRect();
+
+        // Center the active card
+        const currentLeft = card.offsetLeft + cardRect.width / 2;
+        const center = trackRect.width / 2;
         const delta = currentLeft - center;
-        // Translate track so current card is centered
         track.style.transform = `translateX(${-delta}px)`;
+
+        if (!withAnim) { void track.offsetHeight; track.style.transition = 'transform 600ms ease'; }
+        setCurrentClasses();
       }
 
       function go(n){
-        index = (n + cards.length) % cards.length;
-        update();
+        index = n;
+        translateToIndex(true);
       }
+      function next(){ go(index + 1); }
+      function prev(){ go(index - 1); }
 
-      function next(){ go(index+1) }
-      function prev(){ go(index-1) }
-
-      prevBtn.addEventListener('click', prev);
-      nextBtn.addEventListener('click', next);
-
-      // Keyboard
-      carousel.addEventListener('keydown', (e)=>{
-        if(e.key === 'ArrowLeft'){ prev(); }
-        if(e.key === 'ArrowRight'){ next(); }
+      // Jump seamlessly when hitting a clone
+      track.addEventListener('transitionend', () => {
+        if (index === cards.length - 1) {  // right clone
+          index = 1;                       // first real
+          translateToIndex(false);
+        } else if (index === 0) {          // left clone
+          index = cards.length - 2;        // last real
+          translateToIndex(false);
+        }
       });
 
-      // Autoplay (pause on hover/focus)
+      // Buttons + keyboard
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+      carousel.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') prev();
+        if (e.key === 'ArrowRight') next();
+      });
+
+      // Autoplay with hover/focus pause
       function startAuto(){
-        if(reduceMotion) return;
+        if (reduceMotion) return;
         stopAuto();
         autoTimer = setInterval(next, AUTOPLAY_MS);
       }
       function stopAuto(){
-        if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
       }
       carousel.addEventListener('mouseenter', stopAuto);
       carousel.addEventListener('mouseleave', startAuto);
       carousel.addEventListener('focusin', stopAuto);
       carousel.addEventListener('focusout', startAuto);
 
-      // Initial layout after fonts load
-      window.addEventListener('load', ()=>{
-        update();
+      // Initial layout
+      window.addEventListener('load', () => {
+        translateToIndex(false); // position instantly on first real slide
         startAuto();
       });
-      window.addEventListener('resize', update);
+      window.addEventListener('resize', () => translateToIndex(false));
     })();
   </script>
 </body>
 </html>
+
+

@@ -90,6 +90,35 @@
     .help{font-size:12px;color:#4a4f4a}
     @media (max-width: 900px){.contact .wrap{grid-template-columns:1fr}}
 
+    /* ===== Right-side pagination dots ===== */
+.pager{
+  position:fixed; inset:0 20px 0 auto; /* right:20px */
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none; z-index:90;
+}
+.pager ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+.pager a{
+  pointer-events:auto;
+  width:10px; height:10px; border-radius:50%;
+  display:block; border:2px solid rgba(3,75,63,.35); /* green outline, subtle */
+  background:transparent; text-indent:-9999px; overflow:hidden;
+  transition:transform .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.pager a:hover{transform:scale(1.2)}
+.pager a:focus-visible{outline:2px solid var(--green); outline-offset:3px; border-color:var(--green)}
+.pager a[aria-current="true"]{
+  background:var(--green);
+  border-color:var(--green);
+  box-shadow:0 0 0 3px var(--cream); /* soft halo for contrast on mixed bgs */
+}
+@media (max-width: 768px){
+  .pager{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  .pager a{transition:none}
+}
+
+
     footer{background:var(--cream);padding:20px;text-align:center;font-size:14px}
     @media (prefers-reduced-motion: reduce){html{scroll-snap-type:none}.track{transition:none}.parallax-bg{display:none}}
   </style>
@@ -107,6 +136,10 @@
     </div>
   </header>
 
+ <nav class="pager" aria-label="Section navigation">
+  <ul id="pager-dots"></ul>
+</nav>
+ 
   <main>
     <!-- HERO -->
     <section class="hero panel" id="hero">
@@ -348,6 +381,63 @@
       window.addEventListener('load', () => { translateToIndex(false); startAuto(); });
       window.addEventListener('resize', () => translateToIndex(false));
     })();
+
+  // ===== Minimal dot pager (builds from .panel sections) =====
+(function(){
+  const pagerList = document.getElementById('pager-dots');
+  if (!pagerList) return;
+  const sections = Array.from(document.querySelectorAll('section.panel[id]'));
+  if (!sections.length) return;
+
+  // Build dots
+  sections.forEach((sec, i) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = `#${sec.id}`;
+    a.setAttribute('role','link');
+    a.setAttribute('aria-label', sec.querySelector('h1,h2')?.textContent?.trim() || `Section ${i+1}`);
+    a.setAttribute('aria-current','false');
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      sec.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    li.appendChild(a);
+    pagerList.appendChild(li);
+  });
+
+  // IntersectionObserver highlight
+  const dots = Array.from(pagerList.querySelectorAll('a'));
+  function updateActive(id){
+    dots.forEach((a, idx) => {
+      const on = sections[idx].id === id;
+      a.setAttribute('aria-current', on ? 'true' : 'false');
+    });
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY + window.innerHeight * 0.5;
+      let current = sections[0].id;
+      sections.forEach(s => { if (s.offsetTop <= y) current = s.id; });
+      updateActive(current);
+    }, {passive:true});
+    updateActive(sections[0].id);
+    return;
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    let best = null;
+    entries.forEach(ent => {
+      if (ent.isIntersecting && (!best || ent.intersectionRatio > best.intersectionRatio)) best = ent;
+    });
+    if (best?.target?.id) updateActive(best.target.id);
+  }, { threshold: 0.6 });
+
+  sections.forEach(s => io.observe(s));
+  updateActive(sections[0].id);
+})();
+
+    
   </script>
 </body>
 </html>

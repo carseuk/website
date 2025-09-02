@@ -3,106 +3,278 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Carse</title>
+  <title>Carse Analytics</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
-    /* Basic Reset + Fonts */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      color: #222;
-      background: #fafafa;
-    }
-    h1,h2,h3 { margin: 0 0 0.5em; }
-    p { margin: 0 0 1em; }
-
-    /* Layout */
-    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-
-    /* Header */
-    header {
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-      padding: 1em 0;
-    }
-    header .logo {
-      font-weight: bold;
-      font-size: 1.2em;
-    }
-    nav { float: right; }
-    nav a {
-      margin-left: 15px;
-      text-decoration: none;
-      color: #222;
+    /* ===== Brand tokens ===== */
+    :root{
+      --cream:#F7F6EF;
+      --sand:#E8DBC9;
+      --sage:#AEC2B3;
+      --deep:#1E2A22;
+      --text:#202320;
+      --accent:#EBFF5C; /* CTA accent if you add buttons later */
     }
 
-    /* Hero */
-    .hero {
-      padding: 4em 0;
-      text-align: center;
-      background: #eee;
+    /* ===== Base ===== */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--cream);
+      color:var(--text);
+      font:16px/1.6 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
-    .hero h1 { font-size: 2.5em; }
-    .hero p { font-size: 1.2em; color: #555; }
-    .hero .btn {
-      display: inline-block;
-      padding: 0.6em 1.2em;
-      margin-top: 1em;
-      background: #333;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
+    h1,h2,h3,h4{
+      font-family:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+      color:var(--deep);
+      margin:0 0 .5em;
+      letter-spacing:.2px;
+    }
+    a{color:inherit}
+
+    .container{max-width:1100px; margin:0 auto; padding:0 clamp(20px,4vw,40px)}
+
+    /* ===== Header ===== */
+    header.site-header{
+      position:sticky; top:0; z-index:10;
+      background:var(--cream);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .header-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 0;
+    }
+    .brand{
+      font-family:"Cormorant Garamond", Georgia, serif;
+      font-weight:700; font-size:22px; color:var(--deep);
+      text-decoration:none; letter-spacing:.3px;
+    }
+    nav.primary a{
+      text-decoration:none; color:var(--deep); opacity:.9;
+      margin-left:22px; padding-bottom:2px; border-bottom:2px solid transparent;
+      font-weight:500;
+    }
+    nav.primary a:hover{opacity:1; border-color:rgba(30,42,34,.18)}
+
+    /* ===== Hero placeholder ===== */
+    .hero{
+      padding: clamp(56px, 12vh, 120px) 0 clamp(32px, 8vh, 64px);
+    }
+    .hero .intro{
+      max-width: 70ch;
+      font-size: clamp(18px, 2.1vw, 22px);
+      color: var(--text);
+      opacity:.92;
+    }
+    .hero h1{
+      font-size: clamp(40px, 7.2vw, 84px);
+      line-height:1.05;
+      margin-bottom:12px;
     }
 
-    /* Content */
-    section {
-      padding: 3em 0;
+    /* ===== Carousel Section ===== */
+    .portfolio{
+      padding: clamp(36px, 8vh, 72px) 0 clamp(56px, 10vh, 96px);
+      border-top:1px solid rgba(0,0,0,.05);
+    }
+    .portfolio h2{
+      font-size: clamp(28px, 4.5vw, 40px);
+      margin-bottom: 18px;
+    }
+    .carousel{
+      position:relative;
+      overflow:hidden;
+      padding: 24px 0 12px;
+    }
+    .track{
+      display:flex; align-items:stretch; justify-content:center;
+      gap: clamp(12px, 2vw, 20px);
+      transition: transform 600ms ease;
+      will-change: transform;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .track{ transition:none }
     }
 
-    /* Footer */
-    footer {
-      background: #fff;
-      border-top: 1px solid #ddd;
-      text-align: center;
-      padding: 1em 0;
-      font-size: 0.9em;
-      color: #555;
+    .card{
+      flex: 0 0 clamp(240px, 36vw, 360px);
+      background: white;
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.04);
+      padding: 18px;
+      transform: scale(.92);
+      opacity:.6;
+      transition: transform 400ms ease, opacity 400ms ease, box-shadow 400ms ease;
+    }
+    .card h3{
+      font-size: clamp(20px, 3.2vw, 24px);
+      margin-bottom:.4em;
+    }
+    .card p{ margin:0; color:#4a4f4a }
+
+    .card.is-current{
+      transform: scale(1);
+      opacity:1;
+      box-shadow: 0 10px 36px rgba(0,0,0,.08);
+    }
+
+    /* Nav buttons (optional; also keyboard accessible) */
+    .carousel button.nav{
+      position:absolute; top:50%; transform: translateY(-50%);
+      background: rgba(255,255,255,.8);
+      border:1px solid rgba(0,0,0,.1);
+      border-radius: 999px; width:40px; height:40px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(0,0,0,.08);
+    }
+    .carousel button.nav:hover{ background:white }
+    .carousel button.prev{ left:0 }
+    .carousel button.next{ right:0 }
+
+    /* ===== Footer ===== */
+    footer.site-footer{
+      border-top:1px solid rgba(0,0,0,.06);
+      padding:28px 0 36px;
+      color:#4a4f4a; font-size:14px;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="container">
-      <span class="logo">Carse</span>
-      <nav>
-        <a href="#">Home</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
+  <!-- ===== Header ===== -->
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a class="brand" href="#">Carse</a>
+      <nav class="primary" aria-label="Primary">
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
       </nav>
     </div>
   </header>
 
-  <section class="hero">
-    <div class="container">
-      <h1>Hero Headline</h1>
-      <p>Subheadline text goes here. Brief description of what you do.</p>
-      <a href="#" class="btn">Call to Action</a>
-    </div>
-  </section>
+  <!-- ===== Hero (you fill in the copy) ===== -->
+  <main>
+    <section class="hero container" id="hero">
+      <h1><!-- Your hero headline here --></h1>
+      <p class="intro"><!-- Your subheadline / intro text here --></p>
+    </section>
 
-  <section>
-    <div class="container">
-      <h2>Section Title</h2>
-      <p>Placeholder content. You can expand this into case studies, services, or portfolio items.</p>
-    </div>
-  </section>
+    <!-- ===== Portfolio Carousel ===== -->
+    <section class="portfolio" aria-labelledby="portfolio-title">
+      <div class="container">
+        <h2 id="portfolio-title">Selected work</h2>
+        <div class="carousel" role="region" aria-roledescription="carousel" aria-label="Portfolio carousel">
+          <button class="nav prev" aria-label="Previous">&#10094;</button>
+          <div class="track" role="listbox" aria-live="polite">
+            <!-- Card 1 -->
+            <article class="card is-current" role="option" aria-selected="true" tabindex="0">
+              <h3>Portfolio item #1</h3>
+              <p>Short description. Replace with your case study later.</p>
+            </article>
+            <!-- Card 2 -->
+            <article class="card" role="option" aria-selected="false" tabindex="-1">
+              <h3>Portfolio item #2</h3>
+              <p>Short description. Replace with your case study later.</p>
+            </article>
+            <!-- Card 3 -->
+            <article class="card" role="option" aria-selected="false" tabindex="-1">
+              <h3>Portfolio item #3</h3>
+              <p>Short description. Replace with your case study later.</p>
+            </article>
+          </div>
+          <button class="nav next" aria-label="Next">&#10095;</button>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <footer>
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
     <div class="container">
-      <p>© 2025 Carse. All rights reserved.</p>
+      <small>© <span id="year"></span> Carse Analytics. No vanity dashboards.</small>
     </div>
   </footer>
 
+  <script>
+    // ===== Year in footer =====
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ===== Simple carousel logic (no deps) =====
+    (function(){
+      const carousel = document.querySelector('.carousel');
+      const track = carousel.querySelector('.track');
+      const cards = Array.from(track.children);
+      const prevBtn = carousel.querySelector('.prev');
+      const nextBtn = carousel.querySelector('.next');
+
+      let index = 0;
+      let autoTimer = null;
+      const AUTOPLAY_MS = 4000;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function update(){
+        cards.forEach((c,i)=>{
+          c.classList.toggle('is-current', i===index);
+          c.setAttribute('aria-selected', i===index ? 'true':'false');
+          c.tabIndex = i===index ? 0 : -1;
+        });
+
+        // Center the current card
+        const card = cards[index];
+        const cardRect = card.getBoundingClientRect();
+        const trackRect = track.getBoundingClientRect();
+        const currentLeft = card.offsetLeft + cardRect.width/2;
+        const center = (track.scrollLeft || 0) + trackRect.width/2;
+        const delta = currentLeft - center;
+        // Translate track so current card is centered
+        track.style.transform = `translateX(${-delta}px)`;
+      }
+
+      function go(n){
+        index = (n + cards.length) % cards.length;
+        update();
+      }
+
+      function next(){ go(index+1) }
+      function prev(){ go(index-1) }
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+
+      // Keyboard
+      carousel.addEventListener('keydown', (e)=>{
+        if(e.key === 'ArrowLeft'){ prev(); }
+        if(e.key === 'ArrowRight'){ next(); }
+      });
+
+      // Autoplay (pause on hover/focus)
+      function startAuto(){
+        if(reduceMotion) return;
+        stopAuto();
+        autoTimer = setInterval(next, AUTOPLAY_MS);
+      }
+      function stopAuto(){
+        if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+      }
+      carousel.addEventListener('mouseenter', stopAuto);
+      carousel.addEventListener('mouseleave', startAuto);
+      carousel.addEventListener('focusin', stopAuto);
+      carousel.addEventListener('focusout', startAuto);
+
+      // Initial layout after fonts load
+      window.addEventListener('load', ()=>{
+        update();
+        startAuto();
+      });
+      window.addEventListener('resize', update);
+    })();
+  </script>
 </body>
 </html>

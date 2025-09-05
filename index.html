@@ -177,6 +177,23 @@
   .hero .inner.narrow{ text-align: center; }
   .hero .btn-row{ justify-content: center; }
 }
+
+    /* Hero CTA: slight indent on desktop so it isn't perfectly flush */
+@media (min-width: 901px){
+  .hero .btn-row{
+    justify-content: flex-start;
+    margin-left: clamp(6px, 1.2vw, 16px); /* tweak this to taste */
+  }
+}
+
+/* Keep it centered on small screens */
+@media (max-width: 900px){
+  .hero .btn-row{
+    justify-content: center;
+    margin-left: 0;
+  }
+}
+
     .kpis{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:18px}
     .kpis .kpi{background:#fff; border:1px solid rgba(0,0,0,.06); border-radius:999px; padding:8px 12px; font-size:14px}
 

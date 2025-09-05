@@ -168,6 +168,15 @@
     .btn{display:inline-block; margin-top:20px; padding:12px 20px; border-radius:999px; background:var(--green); color:var(--cream); text-decoration:none}
     .btn.secondary{background:transparent; border:1px solid var(--green); color:var(--green)}
     .btn-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+    /* Hero CTA: left-align text and button */
+.hero .inner.narrow{ text-align: left; }
+.hero .btn-row{ justify-content: flex-start; }
+
+/* Keep it centered on small screens */
+@media (max-width: 900px){
+  .hero .inner.narrow{ text-align: center; }
+  .hero .btn-row{ justify-content: center; }
+}
     .kpis{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:18px}
     .kpis .kpi{background:#fff; border:1px solid rgba(0,0,0,.06); border-radius:999px; padding:8px 12px; font-size:14px}
 
@@ -254,7 +263,7 @@
 
       <div class="hero-copy">
         <div class="eyebrow">Shopify analytics for SMEs</div>
-        <h1>Big-business insights for small sellers... </h1>
+        <h1>Big Business Insights for Small Sellers... </h1>
         <p class="lead">We reconcile Shopify transactions, fees, returns and discounts to surface the few insights that actually change behaviour — so you can grow with confidence.</p>
         <div class="btn-row">
          <a class="btn" href="#contact-form">Contact</a>
